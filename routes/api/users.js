@@ -4,7 +4,7 @@ const router = express.Router();
 const gravatar = require('gravatar');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const passwort = require('passport');
+const passport = require('passport');
 const User = require('../../models/User');
 const keys = require('../../config/keys');
 
@@ -71,7 +71,11 @@ router.post('/login', (req, res) => {
           if (isMatch) {
             // user matched in our db
             // Create jwt payload
-            const payload = { ...user };
+            const payload = {
+              id: user.id,
+              name: user.name,
+              avatar: user.avatar
+            };
 
             // JWT token build, sign token with payload and secret, expiresIn 1hr
             jwt.sign(
@@ -90,5 +94,22 @@ router.post('/login', (req, res) => {
     })
     .catch(err => retrun.status(500).json({ message: err }));
 });
+
+// @route   GET api/users/current
+// @desc    Get current user
+// @access  Private Protected Route
+router.get(
+  '/current',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    const user = req.user;
+
+    res.json({
+      id: user.id,
+      name: user.name,
+      email: user.email
+    });
+  }
+);
 
 module.exports = router;
