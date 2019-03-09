@@ -2,8 +2,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const keys = require('./config/keys');
 
-const app = express();
+//routes import
+const users = require('./routes/api/users');
+const profile = require('./routes/api/profile');
+const posts = require('./routes/api/posts');
 
+// New express app
+const app = express();
 // DB Config
 const db = keys.mongoURI;
 // PORT
@@ -21,6 +26,11 @@ mongoose
 app.get('/', (req, res) => {
   res.send('Hello');
 });
+
+// User Routes
+app.use('/api/users', users);
+app.use('/api/profile', profile);
+app.use('/api/posts', posts);
 
 app.listen(port, () => {
   console.log(`App running on port ${port}`);
