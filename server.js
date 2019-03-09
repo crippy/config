@@ -9,6 +9,9 @@ const users = require('./routes/api/users');
 const profile = require('./routes/api/profile');
 const posts = require('./routes/api/posts');
 
+// Load Input Validation
+const validateRegisterInput = require('./validation/register');
+
 // New express app
 const app = express();
 

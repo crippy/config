@@ -19,6 +19,11 @@ router.get('/test', (req, res) => {
 // @desc    Register
 // @access  Public
 router.post('/register', (req, res) => {
+  const { errors, isValid } = validateRegisterInput(req.body);
+
+  if (!isValid) {
+    res.status(400).json(errors);
+  }
   // first find if email exists using mongoose model fn's
   const email = req.body.email;
 
