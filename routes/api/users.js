@@ -2,8 +2,10 @@
 const express = require('express');
 const router = express.Router();
 const gravatar = require('gravatar');
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const User = require('../../models/User');
+const keys = require('../../config/keys');
 
 // @route   GET api/users/test
 // @desc    Test user route
@@ -12,7 +14,7 @@ router.get('/test', (req, res) => {
   res.json({ id: 1, name: 'Jacker Reacher' });
 });
 
-// @route   GET api/users/register
+// @route   POST api/users/register
 // @desc    Register
 // @access  Public
 router.post('/register', (req, res) => {
@@ -38,7 +40,8 @@ router.post('/register', (req, res) => {
           if (err) throw err;
 
           newUser.password = hash;
-          newUser.save()
+          newUser
+            .save()
             .then(user => res.json(user))
             .catch(err => console.log(err));
         });
@@ -47,6 +50,44 @@ router.post('/register', (req, res) => {
     .catch(error => {
       console.log(error);
     });
+});
+
+// @route   POST api/users/login
+// @desc    Login
+// @access  Public
+router.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  // Find user by email
+  User.findOne({ email })
+    .then(user => {
+      // check for a user
+      if (!user) return res.status(404).json({ message: 'Incorrect email' });
+
+      // Check Password
+      bcrypt
+        .compare(password, user.password)
+        .then(isMatch => {
+          if (isMatch) {
+            // user matched in our db
+            // Create jwt payload
+            const payload = { ...user };
+
+            // JWT token build, sign token with payload and secret, expiresIn 1hr
+            jwt.sign(
+              payload,
+              keys.secretOrKey,
+              { expiresIn: 3600 },
+              (err, token) => {
+                res.json({ token: `Bearer ${token}` });
+              }
+            );
+          } else {
+            return res.status(400).json({ message: 'Password incorrect' });
+          }
+        })
+        .catch(err => retrun.status(404).json({ message: err }));
+    })
+    .catch(err => retrun.status(500).json({ message: err }));
 });
 
 module.exports = router;
