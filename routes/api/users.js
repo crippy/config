@@ -25,7 +25,7 @@ router.post('/register', (req, res) => {
         return res.status(400).json({ message: 'Email already exists' });
 
       // gets a random avatar
-      const avatar = gravatar.url(email, { s: '200', d: mm });
+      const avatar = gravatar.url(email, { s: '200' });
       const newUser = new User({
         name: req.body.name,
         email,
@@ -38,8 +38,7 @@ router.post('/register', (req, res) => {
           if (err) throw err;
 
           newUser.password = hash;
-          newUser
-            .save()
+          newUser.save()
             .then(user => res.json(user))
             .catch(err => console.log(err));
         });
