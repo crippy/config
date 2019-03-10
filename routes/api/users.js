@@ -7,7 +7,10 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const User = require('../../models/User');
 const keys = require('../../config/keys');
+
 const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
+
 // @route   GET api/users/test
 // @desc    Test user route
 // @access  Public
@@ -63,6 +66,12 @@ router.post('/register', (req, res) => {
 // @desc    Login
 // @access  Public
 router.post('/login', (req, res) => {
+  // validate the data passed in
+  const { errors, isValid } = validateLoginInput(req.body);
+  // return the errors if validation fails
+  if (!isValid) {
+    res.status(400).json(errors);
+  }
   const { email, password } = req.body;
   // Find user by email
   User.findOne({ email })
