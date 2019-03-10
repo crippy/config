@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt');
 const passport = require('passport');
 const User = require('../../models/User');
 const keys = require('../../config/keys');
-
+const validateRegisterInput = require('../../validation/register');
 // @route   GET api/users/test
 // @desc    Test user route
 // @access  Public
@@ -19,6 +19,7 @@ router.get('/test', (req, res) => {
 // @desc    Register
 // @access  Public
 router.post('/register', (req, res) => {
+  // validate the req.body require the validationLib
   const { errors, isValid } = validateRegisterInput(req.body);
 
   if (!isValid) {
