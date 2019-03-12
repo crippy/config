@@ -4,8 +4,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
-const Profile = require('../../models/Profile');
-const User = require('../../models/User');
+const Profile = require('./profile.model');
+// const User = require('../../models/User');
 
 // @route   GET api/profile/test
 // @desc    Test post route

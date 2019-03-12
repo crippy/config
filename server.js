@@ -5,9 +5,9 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 
 //routes import
-const users = require('./routes/api/users');
-const profile = require('./routes/api/profile');
-const posts = require('./routes/api/posts');
+const users = require('./resources/users/users.router');
+const profile = require('./resources/profile/profile.router');
+const posts = require('./resources/posts/posts.router');
 
 // Load Input Validation
 const validateRegisterInput = require('./validation/register');
