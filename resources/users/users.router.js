@@ -21,10 +21,6 @@ const controller = require('./users.controller');
 // @route   GET api/users/test
 // @desc    Test user route
 // @access  Public
-// router.get('/test', (req, res) => {
-//   res.json({ id: 1, name: 'Jacker Reacher' });
-// });
-
 router.get('/test', controller.getTest);
 
 // @route   POST api/users/register

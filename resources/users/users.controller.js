@@ -1,5 +1,5 @@
 module.exports = {
-  getTest: (req, res) => {
+  register: (req, res) => {
     res.json({ id: 1, name: 'Jacker Reacher' });
   },
   viewOne: function(req, res) {
