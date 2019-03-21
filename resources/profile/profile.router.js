@@ -1,11 +1,13 @@
 // Location bio etc
 // Authentication username, password
+
+console.log(process.version);
+
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const passport = require('passport');
 const Profile = require('./profile.model');
-// const User = require('../../models/User');
 
 // @route   GET api/profile/test
 // @desc    Test post route
@@ -43,10 +45,15 @@ router.post(
   (req, res) => {
     const errors = {};
     // get all fields
+    // const profile = {
+    //   ...req.body,
+    //   user: req.user.id
+    // };
+
     const profile = {
-      ...req.body,
       user: req.user.id
     };
+
     if (typeof req.body.skills !== undefined) {
       profile.skills = req.body.skills.split(',');
     }

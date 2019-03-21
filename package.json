@@ -4,14 +4,15 @@
   "description": "Network Node",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "server": "nodemon server.js"
+    "start": "node index.js",
+    "server": "nodemon index.js"
   },
   "author": "Kris Marks",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^3.0.4",
     "body-parser": "^1.18.3",
+    "esm": "^3.2.20",
     "express": "^4.16.4",
     "gravatar": "^1.8.0",
     "jsonwebtoken": "^8.5.0",
