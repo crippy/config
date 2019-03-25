@@ -51,14 +51,11 @@ module.exports = {
   login: (req, res) => {
     // validate the data passed in
     const { errors, isValid } = validateLoginInput(req.body);
-    console.log('Im in');
     // return the errors if validation fails
     if (!isValid) {
       res.status(400).json(errors);
     }
     const { email, password } = req.body;
-
-    // console.log(`Im in ${JSON.stringify(req.body, 10)}`);
 
     // Find user by email
     User.findOne({ email })
@@ -69,7 +66,6 @@ module.exports = {
         bcrypt
           .compare(password, user.password)
           .then(isMatch => {
-            console.log(`isMatch ${isMatch}`);
             if (isMatch) {
               // user matched in our db
               // Create jwt payload
@@ -84,7 +80,6 @@ module.exports = {
                 keys.secretOrKey,
                 { expiresIn: 3600 },
                 (err, token) => {
-                  console.log(`token is ${token}`);
                   res.json({ token: `Bearer ${token}` });
                 }
               );

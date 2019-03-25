@@ -9,9 +9,6 @@ const users = require('./resources/users/users.router');
 const profile = require('./resources/profile/profile.router');
 const posts = require('./resources/posts/posts.router');
 
-// Load Input Validation
-const validateRegisterInput = require('./validation/register');
-
 // New express app
 const app = express();
 
