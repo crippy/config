@@ -2,10 +2,9 @@
 // Authentication username, password
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
 const passport = require('passport');
 const Profile = require('./profile.model');
-const User = require('../users/users.model');
+const validateProfileInput = require('../../validation/profile');
 const controller = require('./profile.controller');
 
 // @route   GET api/profile/test
@@ -44,26 +43,33 @@ router.post(
   '/',
   passport.authenticate('jwt', { session: false }),
   (req, res) => {
-    const error = {};
-    const profile = {};
-    profile.user = req.user.id;
-    profile.handle = req.body.handle;
-    profile.company = req.body.company;
-    profile.website = req.body.website;
-    profile.location = req.body.location;
-    profile.bio = req.body.bio;
-    profile.status = req.body.status;
-    profile.githubusername = req.body.githubusername;
-    profile.experience = req.body.experience;
-    profile.education = req.body.education;
-    profile.social.youtube = req.body.social.youtube;
-    profile.social.facebook = req.body.social.facebook;
-    profile.social.twitter = req.body.social.twitter;
-    profile.social.instagram = req.body.social.instagram;
-    profile.date = req.body.date;
+    const { errors, isValid } = validateProfileInput(req.body);
+
+    if (!isValid) {
+      //Return Errors
+      return res.status(400).json(errors);
+    }
+
+    const profileFields = {};
+    profileFields.user = req.user.id;
+    profileFields.handle = req.body.handle;
+    profileFields.company = req.body.company;
+    profileFields.website = req.body.website;
+    profileFields.location = req.body.location;
+    profileFields.bio = req.body.bio;
+    profileFields.status = req.body.status;
+    profileFields.githubusername = req.body.githubusername;
+    profileFields.experience = req.body.experience;
+    profileFields.education = req.body.education;
+    profileFields.social = {};
+    if (req.body.youtube) profileFields.social.youtube = req.body.youtube;
+    if (req.body.facebook) profileFields.social.facebook = req.body.facebook;
+    if (req.body.twitter) profileFields.social.twitter = req.body.twitter;
+    if (req.body.instagram) profileFields.social.instagram = req.body.instagram;
+    profileFields.date = req.body.date;
 
     if (typeof req.body.skills !== undefined) {
-      profile.skills = req.body.skills.split(',');
+      profileFields.skills = req.body.skills.split(',');
     }
     // might need to fix social links check in console.log to see what way the
     //values are set
@@ -72,24 +78,30 @@ router.post(
     // find if a profile exists or not determines if we create or update profile
     Profile.findOne({ user })
       .then(profile => {
+        console.log(`Profile is ${profile}`);
         if (profile) {
           // update
           Profile.findOneAndUpdate(
-            { user },
-            { $set: profile },
+            { user: req.user.id },
+            { $set: profileFields },
             { new: true }
           ).then(profile => res.status(200).json(profile));
         } else {
           // find if handle already exists
-          Profile.findOne({ handle: profile.handle }).then(profile => {
-            if (profile) {
-              error.message = 'Handle Already exists!';
-              res.status(400).json(error);
-            }
-          });
+          Profile.findOne({ handle: profileFields.handle })
+            // take the user and extracts name and avatar and stores it in the profile
+            .populate('user', ['name', 'avatar'])
+            .then(profile => {
+              if (profile) {
+                errors.handle = 'Handle Already exists!';
+                res.status(400).json(errors);
+              }
+            })
+            .catch(err => {
+              res.status(400).json(err);
+            });
           // create
-          // new Profile(profile).save().then(profile => res.json(profile));
-          Profile.create(profile).then(profile => res.json(profile));
+          new Profile(profileFields).save().then(profile => res.json(profile));
         }
       })
       .catch(err => {
