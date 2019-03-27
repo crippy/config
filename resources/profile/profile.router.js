@@ -80,6 +80,9 @@ router.get('/user/:user_id', (req, res) => {
     });
 });
 
+// @route   GET api/profile/all
+// @desc    GET All Profiles
+// @access  Public
 router.get('/all', (req, res) => {
   const errors = {};
   Profile.find()
