@@ -26,7 +26,6 @@ router.get(
     const user = req.user.id;
     Profile.findOne({ user })
       .then(profile => {
-        console.log(`Profile from server ${profile}`);
         if (!profile) {
           error.noProfile = 'Profile does not exist';
           return res.status(404).json(error);
@@ -39,6 +38,68 @@ router.get(
   }
 );
 
+// @route   GET api/profile/handle/:handle
+// @desc    GET Profile by handle
+// @access  Public
+router.get('/handle/:handle', (req, res) => {
+  const errors = {};
+  Profile.findOne({ handle: req.params.handle })
+    .populate('user', ['name', 'avatar'])
+    .then(profile => {
+      if (!profile) {
+        errors.noprofile = 'No Profile for the requested user.';
+        // send back to client
+        res.status(404).json(errors);
+      }
+      res.json(profile);
+    })
+    .catch(error => {
+      return res.status(404).json(error);
+    });
+});
+
+// @route   GET api/profile/user/:user_id
+// @desc    GET Profile by user_id
+// @access  Public
+router.get('/user/:user_id', (req, res) => {
+  const errors = {};
+  Profile.findOne({ user: req.params.user_id })
+    .populate('user', ['name', 'avatar'])
+    .then(profile => {
+      if (!profile) {
+        errors.noprofile = 'No Profile for the requested user.';
+        // send back to client
+        res.status(404).json(errors);
+      }
+      res.json(profile);
+    })
+    .catch(error => {
+      return res
+        .status(404)
+        .json({ profile: ' There is no profile for this user.' });
+    });
+});
+
+router.get('/all', (req, res) => {
+  const errors = {};
+  Profile.find()
+    .populate('user'[('name', 'avatar')])
+    .then(profiles => {
+      if (!profiles) {
+        errors.noprofiles = 'No Profiles to display.';
+        res.status(404).json(errors);
+      }
+
+      res.json(profiles);
+    })
+    .catch(err => {
+      res.status(404).json(err);
+    });
+});
+
+// @route   POST api/profile
+// @desc    POST Profile for user
+// @access  Private JWT
 router.post(
   '/',
   passport.authenticate('jwt', { session: false }),
