@@ -5,6 +5,8 @@ const router = express.Router();
 const passport = require('passport');
 const Profile = require('./profile.model');
 const validateProfileInput = require('../../validation/profile');
+const validateExperienceInput = require('../../validation/experience');
+const validateEducationInput = require('../../validation/education');
 const controller = require('./profile.controller');
 
 // @route   GET api/profile/test
@@ -99,6 +101,84 @@ router.get('/all', (req, res) => {
       res.status(404).json(err);
     });
 });
+
+// @route   POST api/profile/experience
+// @desc    POST Profile experience
+// @access  Private JWT
+router.post(
+  '/experience',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    // validation
+    const { errors, isValid } = validateExperienceInput(req.body);
+    // if validation failednpm
+    if (!isValid) {
+      //Return Errors
+      return res.status(400).json(errors);
+    }
+
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      const newExp = {
+        title: req.body.title,
+        company: req.body.company,
+        location: req.body.location,
+        from: req.body.from,
+        to: req.body.to,
+        current: req.body.current,
+        description: req.body.description
+      };
+
+      // Add to exp array
+      console.log(`Profile ${profile}`);
+      if (profile.experience === null) {
+        profile.experience = [];
+      }
+      profile.experience.unshift(newExp);
+
+      profile.save().then(profile => {
+        res.json(profile);
+      });
+    });
+  }
+);
+
+// @route   POST api/profile/education
+// @desc    POST Profile education
+// @access  Private JWT
+router.post(
+  '/education',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    // validation
+    const { errors, isValid } = validateEducationInput(req.body);
+    // if validation failednpm
+    if (!isValid) {
+      //Return Errors
+      return res.status(400).json(errors);
+    }
+
+    Profile.findOne({ user: req.user.id }).then(profile => {
+      const newEducation = {
+        instituation: req.body.instituation,
+        course: req.body.course,
+        classification: req.body.classification,
+        datefrom: req.body.datefrom,
+        dateTo: req.body.dateTo,
+        description: req.body.description
+      };
+      // Add to exp array
+      console.log(`Profile ${profile}`);
+      if (profile.education === null) {
+        profile.education = [];
+      }
+      profile.education.unshift(newEducation);
+
+      profile.save().then(profile => {
+        res.json(profile);
+      });
+    });
+  }
+);
 
 // @route   POST api/profile
 // @desc    POST Profile for user
