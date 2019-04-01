@@ -142,6 +142,30 @@ router.post(
   }
 );
 
+// @route   DELETE api/profile/experience/:id
+// @desc    DELETE Profile experience by id
+// @access  Private JWT
+router.delete(
+  '/experience/:id',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    // get id param
+    const expId = req.params.id;
+    // user
+    const user = req.user.id;
+    Profile.findOne({ user })
+      .then(profile => {
+        // Remove experience
+        profile.experience.remove({ _id: expId });
+        // Save experience
+        profile.save().then(profile => {
+          res.json(profile);
+        });
+      })
+      .catch(err => res.status(404).json(err));
+  }
+);
+
 // @route   POST api/profile/education
 // @desc    POST Profile education
 // @access  Private JWT
@@ -177,6 +201,30 @@ router.post(
         res.json(profile);
       });
     });
+  }
+);
+
+// @route   DELETE api/profile/education/:id
+// @desc    DELETE Profile education by id
+// @access  Private JWT
+router.delete(
+  '/education/:id',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    // get id param
+    const id = req.params.id;
+    // user
+    const user = req.user.id;
+    Profile.findOne({ user })
+      .then(profile => {
+        // Remove education
+        profile.education.remove({ _id: id });
+        // Save education
+        profile.save().then(profile => {
+          res.json(profile);
+        });
+      })
+      .catch(err => res.status(404).json(err));
   }
 );
 
@@ -251,6 +299,23 @@ router.post(
       .catch(err => {
         console.log(err);
       });
+  }
+);
+
+// @route   DELETE api/profile
+// @desc    DELETE Profile
+// @access  Private JWT
+router.delete(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    // user
+    const user = req.user.id;
+    Profile.findOneAndRemove({ user })
+      .then(response => {
+        res.json({ success: true });
+      })
+      .catch(err => res.status(404).json(err));
   }
 );
 
