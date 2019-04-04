@@ -40,21 +40,29 @@ module.exports = {
       const postId = req.params.id;
       // user
       const user = req.user.id;
+      console.log(`user is type ${typeof user} ${user}`);
       // get the post item
       const post = await Post.findById(postId);
-
-      if (!post) return res.status(404).json({ error: 'Post not found' });
-
+      console.log(`${post}`);
+      if (!post) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
       const alreadyLiked = post.likes.includes(user);
+      console.log(`${alreadyLiked}`);
       // if liked remove user
-      if (alreadyLiked)
-        postslikes = post.likes.filter(like => like !== user.toString());
-      else post.likes = post.like.push(user);
+      if (alreadyLiked) {
+        post.likes = post.likes.filter(like => like !== user.toString());
+      } else {
+        post.likes = post.likes.push(user);
+        console.log(`${post}`);
+      }
 
-      const savedPost = await post.save(post);
-      return res.json({ savedPost });
-    } catch (error) {
-      res.status(404).json({ error });
+      const savedPost = await post
+        .save()
+        .then(post => res.json(savedPost))
+        .catch(err => res.status(404).json({ error: err }));
+    } catch (err) {
+      res.status(404).json({ error: err });
     }
   },
   postData: (req, res) => {
