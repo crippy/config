@@ -32,7 +32,7 @@ router.delete(
 );
 
 // @route   POST api/posts/:id/like
-// @desc    POST Like by post:id
+// @desc    POST like / unline a post
 // @access  Private
 router.post(
   '/:id/like',

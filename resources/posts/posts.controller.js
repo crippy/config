@@ -34,34 +34,28 @@ module.exports = {
         });
     });
   },
-  postLike: (req, res) => {
-    // get logged in user
-    const user = req.user.id;
-    // get the postId
-    const postId = req.params.id;
-    // get the post by :id
-    Post.findById(postId).then(post => {
-      // find if the user has liked the post already using filter
-      const userLiked =
-        post.likes.filter(like => like.user.toString() === user).length > 0;
-      // if user has liked the post return error
-      if (userLiked) {
-        return res
-          .status(400)
-          .json({ error: 'User has already liked this post' });
-      }
-      // add user to the likes arr of the post
-      post.likes.unshift({ user });
-      // save the post
-      post
-        .save()
-        .then(post => {
-          res.json(post);
-        })
-        .catch(err => {
-          res.status(404).json({ error: err });
-        });
-    });
+  postLike: async (req, res) => {
+    try {
+      // postid
+      const postId = req.params.id;
+      // user
+      const user = req.user.id;
+      // get the post item
+      const post = await Post.findById(postId);
+
+      if (!post) return res.status(404).json({ error: 'Post not found' });
+
+      const alreadyLiked = post.likes.includes(user);
+      // if liked remove user
+      if (alreadyLiked)
+        postslikes = post.likes.filter(like => like !== user.toString());
+      else post.likes = post.like.push(user);
+
+      const savedPost = await post.save(post);
+      return res.json({ savedPost });
+    } catch (error) {
+      res.status(404).json({ error });
+    }
   },
   postData: (req, res) => {
     console.log(req.body);
