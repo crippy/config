@@ -53,7 +53,7 @@ module.exports = {
       if (alreadyLiked) {
         post.likes = post.likes.filter(like => like !== user.toString());
       } else {
-        post.likes = post.likes.push(user);
+        post.likes = [...post.likes, user];
         console.log(`${post}`);
       }
 
