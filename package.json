@@ -1,27 +1,25 @@
 {
   "name": "connector",
   "version": "1.0.0",
-  "description": "Network Node",
-  "main": "server.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "server": "nodemon server.js"
+    "client": "cd client && npm start --prefix client",
+    "server": "cd api && npm start --prefix server",
+    "start": "concurrently \"cd api && node server.js\" \"cd client && npm start\""
   },
-  "author": "Kris Marks",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/crippy/config.git"
+  },
+  "keywords": [],
+  "author": "",
   "license": "ISC",
-  "dependencies": {
-    "bcrypt": "^3.0.4",
-    "body-parser": "^1.18.3",
-    "esm": "^3.2.20",
-    "express": "^4.16.4",
-    "gravatar": "^1.8.0",
-    "jsonwebtoken": "^8.5.0",
-    "mongoose": "^5.4.17",
-    "passport": "^0.4.0",
-    "passport-jwt": "^4.0.0",
-    "validator": "^10.11.0"
+  "bugs": {
+    "url": "https://github.com/crippy/config/issues"
   },
+  "homepage": "https://github.com/crippy/config#readme",
   "devDependencies": {
-    "nodemon": "^1.18.10"
+    "concurrently": "^4.1.0"
   }
 }

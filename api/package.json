@@ -1,0 +1,28 @@
+{
+  "name": "connector",
+  "version": "1.0.0",
+  "description": "Network Node",
+  "main": "server.js",
+  "scripts": {
+    "start": "node index.js",
+    "server": "nodemon server.js"
+  },
+  "author": "Kris Marks",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.4",
+    "body-parser": "^1.18.3",
+    "concurrently": "^4.1.0",
+    "esm": "^3.2.20",
+    "express": "^4.16.4",
+    "gravatar": "^1.8.0",
+    "jsonwebtoken": "^8.5.0",
+    "mongoose": "^5.4.17",
+    "passport": "^0.4.0",
+    "passport-jwt": "^4.0.0",
+    "validator": "^10.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
+  }
+}

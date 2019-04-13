@@ -34,7 +34,7 @@ module.exports = {
         });
     });
   },
-  postLike: async (req, res) => {
+  postLike: (req, res) => {
     try {
       // postid
       const postId = req.params.id;
@@ -42,7 +42,7 @@ module.exports = {
       const user = req.user.id;
       console.log(`user is type ${typeof user} ${user}`);
       // get the post item
-      const post = await Post.findById(postId);
+      const post = Post.findById(postId);
       console.log(`${post}`);
       if (!post) {
         return res.status(404).json({ error: 'Post not found' });
@@ -57,7 +57,7 @@ module.exports = {
         console.log(`${post}`);
       }
 
-      const savedPost = await post
+      const savedPost = post
         .save()
         .then(post => res.json(savedPost))
         .catch(err => res.status(404).json({ error: err }));
