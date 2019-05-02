@@ -4,18 +4,19 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./users.model');
 const validateLoginInput = require('../../validation/login');
+const config = require('config');
 
 module.exports = {
   register: async (req, res) => {
     // error handling from req.body
     const errors = validationResult(req);
+
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, password } = req.body;
-
     try {
+      const { name, email, password } = req.body;
       // See if user exists...
       let user = await User.findOne({ email });
       // if user
@@ -33,7 +34,6 @@ module.exports = {
 
       // create new user instance
       user = new User(name, email, avatar, password);
-      // Encrypt password
       // salt the password
       const salt = await bcrypt.genSalt(10);
       // take password and hash
@@ -41,7 +41,23 @@ module.exports = {
 
       await user.save();
 
-      res.send('User registered');
+      // create payload
+      const payload = {
+        user: {
+          id: user.id
+        }
+      };
+
+      // JWT Sign
+      jwt.sign(
+        payload,
+        config.get('jwtToken'),
+        { expiresIn: 3600 },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+        }
+      );
     } catch (err) {
       console.log(err.message);
       res.status(500).json('Server Error');
