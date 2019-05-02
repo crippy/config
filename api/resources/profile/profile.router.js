@@ -2,7 +2,6 @@
 // Authentication username, password
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const controller = require('./profile.controller');
 
 // @route   GET api/profile/test
@@ -15,11 +14,7 @@ router.get('/test', (req, res) => {
 // @route   GET api/profile
 // @desc    GET current users profle: loggedin user
 // @access  Private with passport.authenticate
-router.get(
-  '/',
-  passport.authenticate('jwt', { session: false }),
-  controller.getProfile
-);
+router.get('/', controller.getProfile);
 
 // @route   GET api/profile/handle/:handle
 // @desc    GET Profile by handle
@@ -39,55 +34,31 @@ router.get('/all', controller.getAllProfiles);
 // @route   POST api/profile/experience
 // @desc    POST Profile experience
 // @access  Private JWT
-router.post(
-  '/experience',
-  passport.authenticate('jwt', { session: false }),
-  controller.postProfileExperience
-);
+router.post('/experience', controller.postProfileExperience);
 
 // @route   DELETE api/profile/experience/:id
 // @desc    DELETE Profile experience by id
 // @access  Private JWT
-router.delete(
-  '/experience/:id',
-  passport.authenticate('jwt', { session: false }),
-  controller.deleteProfileExperience
-);
+router.delete('/experience/:id', controller.deleteProfileExperience);
 
 // @route   POST api/profile/education
 // @desc    POST Profile education
 // @access  Private JWT
-router.post(
-  '/education',
-  passport.authenticate('jwt', { session: false }),
-  controller.postProfileExperience
-);
+router.post('/education', controller.postProfileExperience);
 
 // @route   DELETE api/profile/education/:id
 // @desc    DELETE Profile education by id
 // @access  Private JWT
-router.delete(
-  '/education/:id',
-  passport.authenticate('jwt', { session: false }),
-  controller.deleteProfileExpById
-);
+router.delete('/education/:id', controller.deleteProfileExpById);
 
 // @route   POST api/profile
 // @desc    POST Profile for user
 // @access  Private JWT
-router.post(
-  '/',
-  passport.authenticate('jwt', { session: false }),
-  controller.postProfile
-);
+router.post('/', controller.postProfile);
 
 // @route   DELETE api/profile
 // @desc    DELETE Profile
 // @access  Private JWT
-router.delete(
-  '/',
-  passport.authenticate('jwt', { session: false }),
-  controller.deleteProfile
-);
+router.delete('/', controller.deleteProfile);
 
 module.exports = router;

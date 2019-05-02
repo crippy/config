@@ -2,7 +2,6 @@
 // Authentication username, password
 const express = require('express');
 const router = express.Router();
-const passport = require('passport');
 const controller = require('./posts.controller');
 
 // @route   GET api/posts/test
@@ -25,28 +24,16 @@ router.get('/:id', controller.getPost);
 // @route   DELETE api/posts/:id
 // @desc    Delete by :id
 // @access  Private
-router.delete(
-  '/:id',
-  passport.authenticate('jwt', { session: false }),
-  controller.deletePost
-);
+router.delete('/:id', controller.deletePost);
 
 // @route   POST api/posts/:id/like
 // @desc    POST like / unline a post
 // @access  Private
-router.post(
-  '/:id/like',
-  passport.authenticate('jwt', { session: false }),
-  controller.postLike
-);
+router.post('/:id/like', controller.postLike);
 
 // @route   POST api/posts
 // @desc    Create post
 // @access  Private
-router.post(
-  '/',
-  passport.authenticate('jwt', { session: false }),
-  controller.postData
-);
+router.post('/', controller.postData);
 
 module.exports = router;

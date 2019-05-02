@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 // Create Schema
 const UserSchema = new Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   avatar: String,
   date: { type: Date, default: Date.now }
@@ -25,5 +25,5 @@ const UserSchema = new Schema({
 //   })
 // }
 
-// export User model
+// export User model 
 module.exports = User = mongoose.model('users', UserSchema);

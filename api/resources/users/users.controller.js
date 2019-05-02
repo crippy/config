@@ -1,52 +1,79 @@
 const gravatar = require('gravatar');
-const bcrypt = require('bcrypt');
+const { validationResult } = require('express-validator/check');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./users.model');
-const keys = require('../../config/keys');
-
-const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
 
 module.exports = {
-  register: (req, res) => {
-    // validate the req.body require the validationLib
-    const { errors, isValid } = validateRegisterInput(req.body);
-
-    if (!isValid) {
-      res.status(400).json(errors);
+  register: async (req, res) => {
+    // error handling from req.body
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
-    // first find if email exists using mongoose model fn's
-    const email = req.body.email;
 
-    User.findOne({ email })
-      .then(user => {
-        if (user)
-          return res.status(400).json({ message: 'Email already exists' });
+    const { name, email, password } = req.body;
 
-        // gets a random avatar
-        const avatar = gravatar.url(email, { s: '200' });
-        const newUser = new User({
-          name: req.body.name,
-          email,
-          avatar,
-          password: req.body.password
-        });
-
-        bcrypt.genSalt(10, (err, salt) => {
-          bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err;
-
-            newUser.password = hash;
-            newUser
-              .save()
-              .then(user => res.json(user))
-              .catch(err => console.log(err));
-          });
-        });
-      })
-      .catch(error => {
-        console.log(error);
+    try {
+      // See if user exists...
+      let user = await User.findOne({ email });
+      // if user
+      if (user) {
+        return res
+          .status(400)
+          .json({ errors: [{ message: 'User already exists' }] });
+      }
+      // get user gravatar
+      const avatar = gravatar.url(email, {
+        s: '200',
+        rating: 'pg',
+        d: 'mm'
       });
+
+      // create new user instance
+      user = new User(name, email, avatar, password);
+      // Encrypt password
+      // salt the password
+      const salt = await bcrypt.genSalt(10);
+      // take password and hash
+      user.password = await bcrypt.hash(password, salt);
+
+      await user.save();
+
+      res.send('User registered');
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).json('Server Error');
+    }
+
+    // Return jsonWebToken
+
+    console.log(req.body);
+    res.json(req.body);
+
+    // validate the req.body require the validationLib
+    // const { errors, isValid } = validateRegisterInput(req.body);
+    // if (!isValid) {
+    //   res.status(400).json(errors);
+    // }
+    // // first find if email exists using mongoose model fn's
+
+    //     // Encrypt Password
+    //     bcrypt.genSalt(10, (err, salt) => {
+    //       bcrypt.hash(newUser.password, salt, (err, hash) => {
+    //         if (err) throw err;
+    //         newUser.password = hash;
+    //         newUser
+    //           .save()
+    //           .then(user => res.json(user))
+    //           .catch(err => console.log(err));
+    //       });
+    //     });
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
+    //   });
   },
   login: (req, res) => {
     // validate the data passed in
