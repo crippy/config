@@ -15,8 +15,10 @@ module.exports = {
       return res.status(400).json({ errors: errors.array() });
     }
 
+    console.log(req.body);
+    const { name, email, password } = req.body;
     try {
-      const { name, email, password } = req.body;
+      console.log('IN TRY');
       // See if user exists...
       let user = await User.findOne({ email });
       // if user
@@ -33,7 +35,7 @@ module.exports = {
       });
 
       // create new user instance
-      user = new User(name, email, avatar, password);
+      user = new User({ name, email, avatar, password });
       // salt the password
       const salt = await bcrypt.genSalt(10);
       // take password and hash
@@ -44,14 +46,16 @@ module.exports = {
       // create payload
       const payload = {
         user: {
-          id: user.id
+          id: user.id,
+          name: user.name,
+          avatar: user.avatar
         }
       };
 
       // JWT Sign
       jwt.sign(
         payload,
-        config.get('jwtToken'),
+        config.get('jwtSecret'),
         { expiresIn: 3600 },
         (err, token) => {
           if (err) throw err;
@@ -62,34 +66,6 @@ module.exports = {
       console.log(err.message);
       res.status(500).json('Server Error');
     }
-
-    // Return jsonWebToken
-
-    console.log(req.body);
-    res.json(req.body);
-
-    // validate the req.body require the validationLib
-    // const { errors, isValid } = validateRegisterInput(req.body);
-    // if (!isValid) {
-    //   res.status(400).json(errors);
-    // }
-    // // first find if email exists using mongoose model fn's
-
-    //     // Encrypt Password
-    //     bcrypt.genSalt(10, (err, salt) => {
-    //       bcrypt.hash(newUser.password, salt, (err, hash) => {
-    //         if (err) throw err;
-    //         newUser.password = hash;
-    //         newUser
-    //           .save()
-    //           .then(user => res.json(user))
-    //           .catch(err => console.log(err));
-    //       });
-    //     });
-    //   })
-    //   .catch(error => {
-    //     console.log(error);
-    //   });
   },
   login: (req, res) => {
     // validate the data passed in
