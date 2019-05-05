@@ -47,7 +47,7 @@ router.post(
       check('company', 'Company is required.')
         .not()
         .isEmpty(),
-      check('from', 'From date is required.')
+      check('datefrom', 'From date is required.')
         .not()
         .isEmpty()
     ]

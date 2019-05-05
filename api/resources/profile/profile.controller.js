@@ -136,29 +136,6 @@ module.exports = {
       console.log(err.message);
       res.status(500).json('Server Error');
     }
-
-    Profile.findOne({ user: req.user.id }).then(profile => {
-      const newExp = {
-        title: req.body.title,
-        company: req.body.company,
-        location: req.body.location,
-        from: req.body.from,
-        to: req.body.to,
-        current: req.body.current,
-        description: req.body.description
-      };
-
-      // Add to exp array
-      console.log(`Profile ${profile}`);
-      if (profile.experience === null) {
-        profile.experience = [];
-      }
-      profile.experience.unshift(newExp);
-
-      profile.save().then(profile => {
-        res.json(profile);
-      });
-    });
   },
   // DELETE api/profile/experience
   deleteProfileExperience: async (req, res) => {
@@ -184,34 +161,42 @@ module.exports = {
   },
   // POST api/profile/education
   postProfileEducation: (req, res) => {
-    // validation
-    const { errors, isValid } = validateEducationInput(req.body);
-    // if validation failednpm
-    if (!isValid) {
-      //Return Errors
-      return res.status(400).json(errors);
-    }
+    const {
+      instituation,
+      course,
+      classification,
+      datefrom,
+      dateTo,
+      description
+    } = req.body;
 
-    Profile.findOne({ user: req.user.id }).then(profile => {
-      const newEducation = {
-        instituation: req.body.instituation,
-        course: req.body.course,
-        classification: req.body.classification,
-        datefrom: req.body.datefrom,
-        dateTo: req.body.dateTo,
-        description: req.body.description
-      };
-      // Add to exp array
-      console.log(`Profile ${profile}`);
-      if (profile.education === null) {
-        profile.education = [];
+    const newEducation = {
+      instituation,
+      course,
+      classification,
+      datefrom,
+      dateTo,
+      description
+    };
+
+    try {
+      // find the current profile to update
+      const profile = await Profile.findOne({ user: req.user.id });
+
+      if (!profile) {
+        return res.status(400).json({ error: 'Profile not found.' });
       }
+
+      // add the new experience to the front of the array
       profile.education.unshift(newEducation);
 
-      profile.save().then(profile => {
-        res.json(profile);
-      });
-    });
+      await profile.save();
+
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server error');
+    }
   },
   // DELETE api/profile/experience/:id
   deleteProfileEducationById: async (req, res) => {
