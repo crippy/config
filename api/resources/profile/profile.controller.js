@@ -91,13 +91,50 @@ module.exports = {
     }
   },
   // POST api/profile/experience
-  postProfileExperience: (req, res) => {
-    // validation
-    const { errors, isValid } = validateExperienceInput(req.body);
-    // if validation failednpm
-    if (!isValid) {
-      //Return Errors
-      return res.status(400).json(errors);
+  postProfileExperience: async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const {
+      title,
+      company,
+      location,
+      from,
+      to,
+      current,
+      description
+    } = req.body;
+
+    const newExperience = {
+      title,
+      company,
+      location,
+      from,
+      to,
+      current,
+      description
+    };
+
+    try {
+      // find the current profile to update
+      const profile = await Profile.findOne({ user: req.user.id });
+
+      if (!profile) {
+        return res.status(400).json({ error: 'Profile not found.' });
+      }
+
+      // add the new experience to the front of the array
+      profile.experience.unshift(newExperience);
+
+      await profile.save();
+
+      res.json(profile);
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).json('Server Error');
     }
 
     Profile.findOne({ user: req.user.id }).then(profile => {
@@ -140,8 +177,8 @@ module.exports = {
       })
       .catch(err => res.status(404).json(err));
   },
-  // POST api/profile/experience
-  postProfileExperience: (req, res) => {
+  // POST api/profile/education
+  postProfileEducation: (req, res) => {
     // validation
     const { errors, isValid } = validateEducationInput(req.body);
     // if validation failednpm

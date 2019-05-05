@@ -36,7 +36,24 @@ router.get('/all', auth, controller.getAllProfiles);
 // @route   POST api/profile/experience
 // @desc    POST Profile experience
 // @access  Private
-router.post('/experience', auth, controller.postProfileExperience);
+router.post(
+  '/experience',
+  [
+    auth,
+    [
+      check('title', 'Title is required.')
+        .not()
+        .isEmpty(),
+      check('company', 'Company is required.')
+        .not()
+        .isEmpty(),
+      check('from', 'From date is required.')
+        .not()
+        .isEmpty()
+    ]
+  ],
+  controller.postProfileExperience
+);
 
 // @route   DELETE api/profile/experience/:id
 // @desc    DELETE Profile experience by id
@@ -46,7 +63,7 @@ router.delete('/experience/:id', auth, controller.deleteProfileExperience);
 // @route   POST api/profile/education
 // @desc    POST Profile education
 // @access  Private
-router.post('/education', auth, controller.postProfileExperience);
+router.post('/education', auth, controller.postProfileEducation);
 
 // @route   DELETE api/profile/education/:id
 // @desc    DELETE Profile education by id
