@@ -3,7 +3,6 @@ const { validationResult } = require('express-validator/check');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./users.model');
-const validateLoginInput = require('../../validation/login');
 const config = require('config');
 
 module.exports = {
@@ -15,10 +14,8 @@ module.exports = {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    console.log(req.body);
     const { name, email, password } = req.body;
     try {
-      console.log('IN TRY');
       // See if user exists...
       let user = await User.findOne({ email });
       // if user
@@ -66,50 +63,6 @@ module.exports = {
       console.log(err.message);
       res.status(500).json('Server Error');
     }
-  },
-  login: (req, res) => {
-    // validate the data passed in
-    const { errors, isValid } = validateLoginInput(req.body);
-    // return the errors if validation fails
-    if (!isValid) {
-      res.status(400).json(errors);
-    }
-    const { email, password } = req.body;
-
-    // Find user by email
-    User.findOne({ email })
-      .then(user => {
-        // check for a user
-        if (!user) res.status(404).json({ message: 'Incorrect email' });
-        // Check Password
-        bcrypt
-          .compare(password, user.password)
-          .then(isMatch => {
-            if (isMatch) {
-              // user matched in our db
-              // Create jwt payload
-              const payload = {
-                id: user.id,
-                name: user.name,
-                avatar: user.avatar
-              };
-              // JWT token build, sign token with payload and secret, expiresIn 1hr
-              jwt.sign(
-                payload,
-                keys.secretOrKey,
-                { expiresIn: 3600 },
-                (err, token) => {
-                  res.json({ token: `Bearer ${token}` });
-                }
-              );
-            } else {
-              error.password = 'Password incorrect';
-              return res.status(400).json(errors);
-            }
-          })
-          .catch(err => res.status(404).json({ message: err }));
-      })
-      .catch(err => res.status(500).json({ message: err }));
   },
   currentUser: (req, res) => {
     const user = req.user;

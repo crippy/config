@@ -3,6 +3,8 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('./profile.controller');
+const auth = require('../../middleware/auth');
+const { check } = require('express-validator/check');
 
 // @route   GET api/profile/test
 // @desc    Test post route
@@ -13,8 +15,8 @@ router.get('/test', (req, res) => {
 
 // @route   GET api/profile
 // @desc    GET current users profle: loggedin user
-// @access  Private with passport.authenticate
-router.get('/', controller.getProfile);
+// @access  Private
+router.get('/', auth, controller.getProfile);
 
 // @route   GET api/profile/handle/:handle
 // @desc    GET Profile by handle
@@ -23,7 +25,7 @@ router.get('/handle/:handle', controller.getHandleById);
 
 // @route   GET api/profile/user/:user_id
 // @desc    GET Profile by user_id
-// @access  Public
+// @access  Private
 router.get('/user/:user_id', controller.getProfileById);
 
 // @route   GET api/profile/all
@@ -53,8 +55,20 @@ router.delete('/education/:id', controller.deleteProfileExpById);
 
 // @route   POST api/profile
 // @desc    POST Profile for user
-// @access  Private JWT
-router.post('/', controller.postProfile);
+// @access  Private
+router.post(
+  '/',
+  auth,
+  [
+    check('status', 'Status is required')
+      .not()
+      .isEmpty(),
+    check('skills', 'Skills is required')
+      .not()
+      .isEmpty()
+  ],
+  controller.postProfile
+);
 
 // @route   DELETE api/profile
 // @desc    DELETE Profile

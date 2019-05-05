@@ -4,12 +4,6 @@ const router = express.Router();
 const controller = require('./users.controller');
 const { check } = require('express-validator/check');
 
-// /api/item
-// router
-//   .route('/')
-//   .get(controllers.getOne)
-//   .post(controllers.createOne);
-
 // @route   GET api/users/test
 // @desc    Test user route
 // @access  Public
@@ -32,11 +26,6 @@ router.post(
   ],
   controller.register
 );
-
-// @route   POST api/users/login
-// @desc    Login
-// @access  Public
-router.post('/login', controller.login);
 
 // @route   GET api/users/current
 // @desc    Get current user

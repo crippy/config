@@ -1,25 +1,45 @@
 const Profile = require('./profile.model');
-const validateProfileInput = require('../../validation/profile');
 const validateExperienceInput = require('../../validation/experience');
 const validateEducationInput = require('../../validation/education');
 
+const { validationResult } = require('express-validator/check');
+
 module.exports = {
   // GET api/profile
-  getProfile: (req, res) => {
-    const error = {};
-    // gets it from the requesters jwt token
-    const user = req.user.id;
-    Profile.findOne({ user })
-      .then(profile => {
-        if (!profile) {
-          error.noProfile = 'Profile does not exist';
-          return res.status(404).json(error);
-        }
-        return res.json(profile);
-      })
-      .catch(error => {
-        return res.status(404).json(error);
-      });
+  getProfile: async (req, res) => {
+    try {
+      // gets the current user from the requesters token
+      console.log(req);
+      const profile = await Profile.findOne({ user: req.user.id }).populate(
+        'user',
+        ['name', 'avatar']
+      );
+
+      if (!profile) {
+        return res
+          .status(400)
+          .json({ error: 'There is no profile for this user' });
+      }
+
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      return res.status(500).json(err);
+    }
+    // const error = {};
+    // // gets it from the requesters jwt token
+    // const user = req.user.id;
+    // Profile.findOne({ user })
+    //   .then(profile => {
+    //     if (!profile) {
+    //       error.noProfile = 'Profile does not exist';
+    //       return res.status(404).json(error);
+    //     }
+    //     return res.json(profile);
+    //   })
+    //   .catch(error => {
+    //     return res.status(404).json(error);
+    //   });
   },
   // GET api/profile/handle/:id
   getHandleById: (req, res) => {
@@ -173,71 +193,70 @@ module.exports = {
       .catch(err => res.status(404).json(err));
   },
   // POST api/profile
-  postProfile: (req, res) => {
-    const { errors, isValid } = validateProfileInput(req.body);
+  postProfile: async (req, res) => {
+    const errors = validationResult(req);
 
-    if (!isValid) {
+    if (!errors.isEmpty()) {
       //Return Errors
-      return res.status(400).json(errors);
+      return res.status(400).json({ errors: errors.array() });
     }
 
+    const {
+      company,
+      website,
+      location,
+      bio,
+      status,
+      githubusername,
+      skills,
+      youtube,
+      facebook,
+      twitter,
+      instagram,
+      linkedIn
+    } = req.body;
+
+    // build profile object
     const profileFields = {};
     profileFields.user = req.user.id;
-    profileFields.handle = req.body.handle;
-    profileFields.company = req.body.company;
-    profileFields.website = req.body.website;
-    profileFields.location = req.body.location;
-    profileFields.bio = req.body.bio;
-    profileFields.status = req.body.status;
-    profileFields.githubusername = req.body.githubusername;
-    profileFields.experience = req.body.experience;
-    profileFields.education = req.body.education;
-    profileFields.social = {};
-    if (req.body.youtube) profileFields.social.youtube = req.body.youtube;
-    if (req.body.facebook) profileFields.social.facebook = req.body.facebook;
-    if (req.body.twitter) profileFields.social.twitter = req.body.twitter;
-    if (req.body.instagram) profileFields.social.instagram = req.body.instagram;
-    profileFields.date = req.body.date;
-
-    if (typeof req.body.skills !== undefined) {
-      profileFields.skills = req.body.skills.split(',');
+    if (company) profileFields.company = comapny;
+    if (website) profileFields.website = website;
+    if (location) profileFields.location = location;
+    if (bio) profileFields.bio = bio;
+    if (status) profileFields.status = status;
+    if (githubusername) profileFields.githubusername = githubusername;
+    if (skills) {
+      profileFields.skills = skills.split(',').map(skill => skill.trim());
     }
-    // might need to fix social links check in console.log to see what way the
-    //values are set
-    const user = req.user.id;
 
-    // find if a profile exists or not determines if we create or update profile
-    Profile.findOne({ user })
-      .then(profile => {
-        console.log(`Profile is ${profile}`);
-        if (profile) {
-          // update
-          Profile.findOneAndUpdate(
-            { user: req.user.id },
-            { $set: profileFields },
-            { new: true }
-          ).then(profile => res.status(200).json(profile));
-        } else {
-          // find if handle already exists
-          Profile.findOne({ handle: profileFields.handle })
-            // take the user and extracts name and avatar and stores it in the profile
-            .populate('user', ['name', 'avatar'])
-            .then(profile => {
-              if (profile) {
-                errors.handle = 'Handle Already exists!';
-                res.status(400).json(errors);
-              }
-            })
-            .catch(err => {
-              res.status(400).json(err);
-            });
-          // create
-          new Profile(profileFields).save().then(profile => res.json(profile));
-        }
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    // build social object
+    profileFields.social = {};
+    if (youtube) profileFields.social.youtube = youtube;
+    if (facebook) profileFields.social.facebook = facebook;
+    if (twitter) profileFields.social.twitter = twitter;
+    if (instagram) profileFields.social.instagram = instagram;
+    if (linkedIn) profileFields.social.linkedIn = linkedIn;
+    profileFields.date = new Date();
+
+    try {
+      let profile = await Profile.findOne({ user: req.user.id });
+      if (profile) {
+        profile = await Profile.findOneAndUpdate(
+          { user: req.user.id },
+          { $set: profileFields },
+          { new: true }
+        );
+        return res.json(profile);
+      }
+
+      // create new profile
+      profile = new Profile(profileFields);
+      await Profile.save();
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server Error');
+    }
   },
   // DELETE api/profile
   deleteProfile: (req, res) => {
