@@ -72,7 +72,7 @@ router.post(
 
 // @route   DELETE api/profile
 // @desc    DELETE Profile
-// @access  Private JWT
-router.delete('/', controller.deleteProfile);
+// @access  Private
+router.delete('/', auth, controller.deleteProfile);
 
 module.exports = router;

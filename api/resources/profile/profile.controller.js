@@ -43,20 +43,19 @@ module.exports = {
   },
   // GET api/profile/handle/:id
   getHandleById: async (req, res) => {
-    const errors = {};
-    Profile.findOne({ handle: req.params.handle })
-      .populate('user', ['name', 'avatar'])
-      .then(profile => {
-        if (!profile) {
-          errors.noprofile = 'No Profile for the requested user.';
-          // send back to client
-          res.status(404).json(errors);
-        }
-        res.json(profile);
-      })
-      .catch(error => {
-        return res.status(404).json(error);
-      });
+    try {
+      const profile = await Profile.findOne({
+        handle: req.params.handle
+      }).populate('user', ['name', 'avatart']);
+
+      if (!profile) {
+        res.status(400).json({ error: 'No Profile for the requested user.' });
+      }
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server Error');
+    }
   },
   //  GET api/profile/user/:id
   getProfileById: async (req, res) => {
@@ -67,7 +66,9 @@ module.exports = {
       );
 
       if (!profile) {
-        return res.status(400).json({ error: 'No profile for this user' });
+        return res
+          .status(400)
+          .json({ error: 'No profile for the requested user.' });
       }
 
       res.json(profile);
@@ -254,13 +255,17 @@ module.exports = {
     }
   },
   // DELETE api/profile
-  deleteProfile: (req, res) => {
-    // user
-    const user = req.user.id;
-    Profile.findOneAndRemove({ user })
-      .then(response => {
-        res.json({ success: true });
-      })
-      .catch(err => res.status(404).json(err));
+  deleteProfile: async (req, res) => {
+    try {
+      const user = req.user.id;
+      // remove profile
+      const profile = await Profile.findByIdAndRemove({ user });
+      // remove user from db ...
+
+      res.status(200).json({ message: 'User profile deleted.' });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server Error');
+    }
   }
 };
