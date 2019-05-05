@@ -77,22 +77,18 @@ module.exports = {
           .json({ profile: ' There is no profile for this user.' });
       });
   },
-  // GET api/profile
-  getAllProfiles: (req, res) => {
-    const errors = {};
-    Profile.find()
-      .populate('user'[('name', 'avatar')])
-      .then(profiles => {
-        if (!profiles) {
-          errors.noprofiles = 'No Profiles to display.';
-          res.status(404).json(errors);
-        }
-
-        res.json(profiles);
-      })
-      .catch(err => {
-        res.status(404).json(err);
-      });
+  // GET api/profile/all
+  getAllProfiles: async (req, res) => {
+    try {
+      const profiles = await Profile.find().populate('user', [
+        'name',
+        'avatar'
+      ]);
+      res.json(profiles);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send('Server Error');
+    }
   },
   // POST api/profile/experience
   postProfileExperience: (req, res) => {
