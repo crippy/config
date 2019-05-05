@@ -42,7 +42,7 @@ module.exports = {
     //   });
   },
   // GET api/profile/handle/:id
-  getHandleById: (req, res) => {
+  getHandleById: async (req, res) => {
     const errors = {};
     Profile.findOne({ handle: req.params.handle })
       .populate('user', ['name', 'avatar'])
@@ -59,23 +59,22 @@ module.exports = {
       });
   },
   //  GET api/profile/user/:id
-  getProfileById: (req, res) => {
-    const errors = {};
-    Profile.findOne({ user: req.params.user_id })
-      .populate('user', ['name', 'avatar'])
-      .then(profile => {
-        if (!profile) {
-          errors.noprofile = 'No Profile for the requested user.';
-          // send back to client
-          res.status(404).json(errors);
-        }
-        res.json(profile);
-      })
-      .catch(error => {
-        return res
-          .status(404)
-          .json({ profile: ' There is no profile for this user.' });
-      });
+  getProfileById: async (req, res) => {
+    try {
+      const profile = await Profile.findOne({ user: req.params.id }).populate(
+        'user',
+        ['name', 'avatar']
+      );
+
+      if (!profile) {
+        return res.status(400).json({ error: 'No profile for this user' });
+      }
+
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server Error');
+    }
   },
   // GET api/profile/all
   getAllProfiles: async (req, res) => {
