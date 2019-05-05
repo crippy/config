@@ -102,8 +102,8 @@ module.exports = {
       title,
       company,
       location,
-      from,
-      to,
+      datefrom,
+      dateTo,
       current,
       description
     } = req.body;
@@ -112,8 +112,8 @@ module.exports = {
       title,
       company,
       location,
-      from,
-      to,
+      datefrom,
+      dateTo,
       current,
       description
     };
@@ -161,21 +161,26 @@ module.exports = {
     });
   },
   // DELETE api/profile/experience
-  deleteProfileExperience: (req, res) => {
+  deleteProfileExperience: async (req, res) => {
     // get id param
     const expId = req.params.id;
-    // user
-    const user = req.user.id;
-    Profile.findOne({ user })
-      .then(profile => {
-        // Remove experience
-        profile.experience.remove({ _id: expId });
-        // Save experience
-        profile.save().then(profile => {
-          res.json(profile);
-        });
-      })
-      .catch(err => res.status(404).json(err));
+    try {
+      const profile = await Profile.findById({ user: req.user.id });
+
+      if (!profile) {
+        return res.status(400).json({ error: 'Profile not found.' });
+      }
+
+      const idx = profile.experience.findIndex(exp => exp._id === expId);
+
+      profile.experience.splice(idx, 1);
+      await profile.save();
+
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server Error');
+    }
   },
   // POST api/profile/education
   postProfileEducation: (req, res) => {
@@ -209,7 +214,27 @@ module.exports = {
     });
   },
   // DELETE api/profile/experience/:id
-  deleteProfileExpById: (req, res) => {
+  deleteProfileEducationById: async (req, res) => {
+    // get id param
+    const expId = req.params.id;
+    try {
+      const profile = await Profile.findById({ user: req.user.id });
+
+      if (!profile) {
+        return res.status(400).json({ error: 'Profile not found.' });
+      }
+
+      const idx = profile.education.findIndex(ed => ed._id === expId);
+
+      profile.education.splice(idx, 1);
+      await profile.save();
+
+      res.json(profile);
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server Error');
+    }
+
     // get id param
     const id = req.params.id;
     // user

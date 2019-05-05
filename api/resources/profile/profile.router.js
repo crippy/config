@@ -68,7 +68,7 @@ router.post('/education', auth, controller.postProfileEducation);
 // @route   DELETE api/profile/education/:id
 // @desc    DELETE Profile education by id
 // @access  Private
-router.delete('/education/:id', auth, controller.deleteProfileExpById);
+router.delete('/education/:id', auth, controller.deleteProfileEducationById);
 
 // @route   POST api/profile
 // @desc    POST Profile for user
