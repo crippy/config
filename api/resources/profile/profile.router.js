@@ -21,37 +21,37 @@ router.get('/', auth, controller.getProfile);
 // @route   GET api/profile/handle/:handle
 // @desc    GET Profile by handle
 // @access  Public
-router.get('/handle/:handle', controller.getHandleById);
+router.get('/handle/:handle', auth, controller.getHandleById);
 
 // @route   GET api/profile/user/:user_id
 // @desc    GET Profile by user_id
 // @access  Private
-router.get('/user/:user_id', controller.getProfileById);
+router.get('/user/:user_id', auth, controller.getProfileById);
 
 // @route   GET api/profile/all
 // @desc    GET All Profiles
-// @access  Public
-router.get('/all', controller.getAllProfiles);
+// @access  Private
+router.get('/all', auth, controller.getAllProfiles);
 
 // @route   POST api/profile/experience
 // @desc    POST Profile experience
-// @access  Private JWT
-router.post('/experience', controller.postProfileExperience);
+// @access  Private
+router.post('/experience', auth, controller.postProfileExperience);
 
 // @route   DELETE api/profile/experience/:id
 // @desc    DELETE Profile experience by id
-// @access  Private JWT
-router.delete('/experience/:id', controller.deleteProfileExperience);
+// @access  Private
+router.delete('/experience/:id', auth, controller.deleteProfileExperience);
 
 // @route   POST api/profile/education
 // @desc    POST Profile education
-// @access  Private JWT
-router.post('/education', controller.postProfileExperience);
+// @access  Private
+router.post('/education', auth, controller.postProfileExperience);
 
 // @route   DELETE api/profile/education/:id
 // @desc    DELETE Profile education by id
-// @access  Private JWT
-router.delete('/education/:id', controller.deleteProfileExpById);
+// @access  Private
+router.delete('/education/:id', auth, controller.deleteProfileExpById);
 
 // @route   POST api/profile
 // @desc    POST Profile for user
