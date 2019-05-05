@@ -92,4 +92,9 @@ router.post(
 // @access  Private
 router.delete('/', auth, controller.deleteProfile);
 
+// @route   GET api/profile/github/:username
+// @desc    GET User repo from GitHub
+// @access  Private
+router.get('/github/:username', auth, controller.getGithubProfile);
+
 module.exports = router;

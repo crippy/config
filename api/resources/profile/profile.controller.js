@@ -1,7 +1,6 @@
 const Profile = require('./profile.model');
-const validateExperienceInput = require('../../validation/experience');
-const validateEducationInput = require('../../validation/education');
-
+const request = require('request');
+const config = require('config');
 const { validationResult } = require('express-validator/check');
 
 module.exports = {
@@ -49,7 +48,9 @@ module.exports = {
       }).populate('user', ['name', 'avatart']);
 
       if (!profile) {
-        res.status(400).json({ error: 'No Profile for the requested user.' });
+        return res
+          .status(400)
+          .json({ error: 'No Profile for the requested user.' });
       }
       res.json(profile);
     } catch (err) {
@@ -160,7 +161,7 @@ module.exports = {
     }
   },
   // POST api/profile/education
-  postProfileEducation: (req, res) => {
+  postProfileEducation: async (req, res) => {
     const {
       instituation,
       course,
@@ -310,6 +311,33 @@ module.exports = {
       // remove user from db ...
 
       res.status(200).json({ message: 'User profile deleted.' });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).json('Server Error');
+    }
+  },
+  // GET api/profile/github/:username
+  getGithubProfile: (req, res) => {
+    try {
+      const gitHubUsername = req.params.username;
+      console.log(gitHubUsername);
+      const options = {
+        url: `https://api.github.com/users/${gitHubUsername}/repos?per_page=5
+        &sort=created:asc&client_id=${config.get(
+          'githubClientId'
+        )}&client_secret=${config.get('githubSecret')}`,
+        method: 'GET',
+        headers: { 'user-agent': 'node.js' }
+      };
+      request(options, (error, response, body) => {
+        if (error) console.error(error);
+
+        if (response.statusCode !== 200) {
+          return res.status(400).json({ error: 'No GitHub profile found.' });
+        }
+
+        res.json(JSON.parse(body));
+      });
     } catch (err) {
       console.error(err.message);
       res.status(500).json('Server Error');
